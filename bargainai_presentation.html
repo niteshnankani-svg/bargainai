@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BargainAI — Indian Negotiation Agent</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a1628;color:#e2e8f0;min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInR{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+@keyframes priceDown{from{color:#e24b4a;transform:scale(1.15)}to{color:#4ade80;transform:scale(1)}}
+@keyframes dealPop{0%{opacity:0;transform:scale(0.6)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+.container{max-width:680px;margin:0 auto;padding:1.5rem 1rem}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;animation:fadeUp 0.6s ease both}
+.hero-title{font-size:3rem;font-weight:700;background:linear-gradient(135deg,#f5c842,#e8954a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+.hero-sub{font-size:0.9rem;color:#475569;margin-top:0.4rem}
+.insight-box{background:#0f1f35;border-radius:12px;border:0.5px solid #1e3a5f;padding:1.25rem 1.5rem;text-align:center;margin-bottom:1.5rem;animation:pulse 3s ease-in-out infinite}
+.insight-text{font-size:1.05rem;font-weight:600;color:#93c5fd}
+.insight-sub{font-size:0.82rem;color:#475569;margin-top:0.25rem}
+.tabs{display:flex;gap:10px;margin-bottom:0.75rem}
+.tab{flex:1;padding:10px;border-radius:10px;border:0.5px solid #1e3a5f;text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:#475569;background:#0f1f35;transition:all 0.2s}
+.tab.active.male-tab{background:#064e3b;border-color:#25D366;color:#4ade80}
+.tab.active.female-tab{background:#4a0020;border-color:#f48fb1;color:#f9a8d4}
+.tab-icon{font-size:18px;display:block;margin-bottom:3px}
+.gender-label{text-align:center;font-size:11px;color:#475569;margin-bottom:0.75rem}
+.price-row{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding:0.75rem 1rem;background:#0f1f35;border-radius:10px;margin-bottom:1rem;border:0.5px solid #1e3a5f}
+.price-box{text-align:center}
+.price-label{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:0.5px}
+.price-val{font-size:1.6rem;font-weight:700;color:#e2e8f0;transition:all 0.4s}
+.price-val.dropped{animation:priceDown 0.5s ease both}
+.price-arrow{color:#334155;font-size:1.2rem}
+.chat-container{background:#0f1f35;border-radius:12px;border:0.5px solid #1e3a5f;overflow:hidden;margin-bottom:1rem}
+.chat-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:10px}
+.chat-header.male{background:#075E54}
+.chat-header.female{background:#880E4F}
+.chat-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.chat-avatar.male{background:#25D366}
+.chat-avatar.female{background:#f48fb1}
+.chat-name{font-size:13px;font-weight:600;color:#fff}
+.chat-status{font-size:10px;color:rgba(255,255,255,0.6)}
+.chat-body{padding:1rem;display:flex;flex-direction:column;gap:10px;min-height:280px}
+.msg{max-width:80%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;opacity:0}
+.msg.customer{background:#1e3a5f;color:#e2e8f0;align-self:flex-start;border-radius:12px 12px 12px 2px}
+.msg.agent{align-self:flex-end;border-radius:12px 12px 2px 12px}
+.msg.male-agent{background:#075E54;color:#fff}
+.msg.female-agent{background:#880E4F;color:#fff}
+.msg.show{animation:slideIn 0.35s ease both}
+.msg.agent.show{animation:slideInR 0.35s ease both}
+.intent-badge{font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px;font-weight:600}
+.deal-badge{display:none;text-align:center;padding:0.75rem;background:#064e3b;border-radius:10px;border:0.5px solid #25D366;margin-bottom:1rem}
+.deal-badge.show{display:block;animation:dealPop 0.5s ease both}
+.deal-text{font-size:0.9rem;font-weight:600;color:#4ade80}
+.section-label{font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.6rem}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat-card{background:#0f1f35;border-radius:10px;border:0.5px solid #1e3a5f;padding:1rem;text-align:center;opacity:0;animation:fadeUp 0.5s ease both}
+.stat-num{font-size:1.8rem;font-weight:700;color:#60a5fa}
+.stat-label{font-size:10px;color:#475569;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px}
+.flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.flow-step{background:#0f1f35;border-radius:10px;border:0.5px solid #1e3a5f;padding:0.75rem 0.5rem;text-align:center;opacity:0;position:relative}
+.flow-step.show{animation:fadeUp 0.4s ease both}
+.flow-icon{font-size:1.3rem;margin-bottom:5px}
+.flow-label{font-size:10px;font-weight:600;color:#93c5fd}
+.flow-sub{font-size:9px;color:#475569;margin-top:2px}
+.flow-arr{position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:#334155;font-size:14px;z-index:1}
+.books-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.book-pill{background:#0f1f35;border:0.5px solid #1e3a5f;border-radius:20px;padding:4px 12px;font-size:10px;color:#64748b;opacity:0;transition:opacity 0.3s}
+.stack-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.stack-pill{background:#0f2744;border-radius:20px;padding:4px 12px;font-size:10px;color:#60a5fa;border:0.5px solid #1e3a5f;opacity:0;transition:opacity 0.3s}
+.footer{text-align:center;padding:1.5rem 1rem;border-top:0.5px solid #1e3a5f;font-size:11px;color:#334155}
+.replay-btn{background:#0f1f35;border:0.5px solid #1e3a5f;border-radius:8px;padding:8px 20px;font-size:12px;color:#475569;cursor:pointer;margin-top:0.75rem;transition:all 0.2s}
+.replay-btn:hover{background:#1e3a5f;color:#93c5fd}
+.try-btn{display:inline-block;background:linear-gradient(135deg,#f5c842,#e8954a);color:#0a1628;font-weight:700;font-size:13px;padding:10px 24px;border-radius:10px;text-decoration:none;margin-top:0.75rem;border:none;cursor:pointer;transition:opacity 0.2s}
+.try-btn:hover{opacity:0.85}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <div class="hero-title">BargainAI</div>
+  <div class="hero-sub">AI-powered negotiation agent · India + Global · Gender-aware · 9 books · MuRIL + BERT</div>
+</div>
+
+<div class="insight-box">
+  <div class="insight-text">Indians don't want a 10% discount coupon. They want to bargain.</div>
+  <div class="insight-sub">BargainAI negotiates like a real dukandaar — warm, playful, gender-aware, human.</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active male-tab" id="tab-male" onclick="switchTab('male')">
+    <span class="tab-icon">👨</span>Bhaiya conversation
+  </div>
+  <div class="tab female-tab" id="tab-female" onclick="switchTab('female')">
+    <span class="tab-icon">👩</span>Didi conversation
+  </div>
+</div>
+
+<div class="gender-label" id="gender-label">Male customer · Agent uses "Bhaiya" · Friendly + light humor</div>
+
+<div class="price-row">
+  <div class="price-box">
+    <div class="price-label">MRP</div>
+    <div class="price-val">₹899</div>
+  </div>
+  <div class="price-arrow">→</div>
+  <div class="price-box">
+    <div class="price-label">Current offer</div>
+    <div class="price-val" id="offer-val">₹849</div>
+  </div>
+  <div class="price-arrow">→</div>
+  <div class="price-box">
+    <div class="price-label">Floor price</div>
+    <div class="price-val" style="color:#f87171">₹749</div>
+  </div>
+</div>
+
+<div class="chat-container">
+  <div class="chat-header male" id="chat-header">
+    <div class="chat-avatar male" id="chat-avatar">S</div>
+    <div>
+      <div class="chat-name">BargainAI · Shop Assistant</div>
+      <div class="chat-status">online</div>
+    </div>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+</div>
+
+<div class="deal-badge" id="deal-badge">
+  <div class="deal-text" id="deal-text">Deal closed · Margin protected · Customer feels like they won</div>
+</div>
+
+<div class="section-label">Intelligence</div>
+<div class="stats-grid">
+  <div class="stat-card" style="animation-delay:0.5s"><div class="stat-num" id="s1">0%</div><div class="stat-label">India accuracy</div></div>
+  <div class="stat-card" style="animation-delay:0.7s"><div class="stat-num" id="s2">0%</div><div class="stat-label">Global accuracy</div></div>
+  <div class="stat-card" style="animation-delay:0.9s"><div class="stat-num" id="s3">0</div><div class="stat-label">Book chunks</div></div>
+</div>
+
+<div class="section-label">How it works</div>
+<div class="flow-grid">
+  <div class="flow-step" id="f1"><div class="flow-icon">🛒</div><div class="flow-label">Cart abandoned</div><div class="flow-sub">trigger fires</div><div class="flow-arr">›</div></div>
+  <div class="flow-step" id="f2"><div class="flow-icon">💬</div><div class="flow-label">WhatsApp sent</div><div class="flow-sub">auto triggered</div><div class="flow-arr">›</div></div>
+  <div class="flow-step" id="f3"><div class="flow-icon">🧠</div><div class="flow-label">AI negotiates</div><div class="flow-sub">gender-aware</div><div class="flow-arr">›</div></div>
+  <div class="flow-step" id="f4"><div class="flow-icon">✅</div><div class="flow-label">Deal closed</div><div class="flow-sub">margin protected</div></div>
+</div>
+
+<div class="section-label">Knowledge base</div>
+<div class="books-row" id="books-row"></div>
+
+<div class="section-label">Tech stack</div>
+<div class="stack-row" id="stack-row"></div>
+
+<div class="footer">
+  Built by Nitesh Nankani<br>
+  MuRIL + BERT + Claude Haiku + 9 Negotiation Books · Python · HuggingFace · Gradio
+  <br>
+  <button class="replay-btn" onclick="replayAll()">Replay animation</button>
+</div>
+
+</div>
+<script>
+const convos={
+  male:{
+    label:'Male customer · Agent uses "Bhaiya" · Friendly + light humor',
+    headerClass:'male',avatarClass:'male',agentClass:'male-agent',
+    deal:'Deal closed at ₹820 · Bhaiya got a great deal 😄',
+    msgs:[
+      {role:'customer',text:'Bhai yeh jacket dekhi thi... bahut mehnga lag raha hai yaar',intent:'price_objection',ic:'#1e3a5f',it:'#93c5fd',delay:600},
+      {role:'agent',text:'Arre Bhaiya, aapki nazar toh ekdum sahi jagah padi! 😄 Aapke liye ₹829 final kar deta hoon — baki log toh poora ₹899 de rahe hain, aap lucky ho!',price:829,delay:2000},
+      {role:'customer',text:'₹800 mein doge? Final batao bhai',intent:'walkaway_threat',ic:'#3b0f0f',it:'#f87171',delay:3600},
+      {role:'agent',text:'Bhaiya ₹800 mein toh mera boss mujhe ghar bhej dega 😂 Lekin aapke liye ₹820 final — free delivery bhi! Pakka deal hai yeh!',price:820,delay:5000},
+      {role:'customer',text:'Haha theek hai bhai ₹820 done!',intent:'ready_to_buy',ic:'#064e3b',it:'#4ade80',delay:6600},
+    ]
+  },
+  female:{
+    label:'Female customer · Agent uses "Didi" · Warm + sisterly humor',
+    headerClass:'female',avatarClass:'female',agentClass:'female-agent',
+    deal:'Deal closed at ₹820 · Didi got the best price 😊',
+    msgs:[
+      {role:'customer',text:'Yeh kurti dekhi thi... bahut sundar hai par thoda mehnga lag raha hai',intent:'price_objection',ic:'#1e3a5f',it:'#93c5fd',delay:600},
+      {role:'agent',text:'Didi aapki choice ekdum amazing hai — yeh kurti aap par ekdum perfect lagegi! 😊 Aapke liye ₹829 special kar deti hoon, aur koi nahi milega itna sasta!',price:829,delay:2000},
+      {role:'customer',text:'Thoda aur kam nahi hoga? ₹800 mein de do na',intent:'value_seeker',ic:'#2d1a00',it:'#fbbf24',delay:3600},
+      {role:'agent',text:'Arre Didi aap toh itni acchi customer hain! 😄 ₹820 final kar deti hoon — delivery bhi free aur return bhi available! Ekdum safe deal!',price:820,delay:5000},
+      {role:'customer',text:'Haan theek hai Didi ji ₹820 le leti hoon!',intent:'ready_to_buy',ic:'#064e3b',it:'#4ade80',delay:6600},
+    ]
+  }
+};
+
+const books=['Never Split the Difference','Influence','How to Win Friends','Psychology of Selling','Pre-Suasion','Getting to Yes','Bargaining for Advantage','Power','Sell or Be Sold'];
+const stack=['MuRIL','BERT','LLaMA 3.1','Claude Haiku','Groq','HuggingFace','Gradio','PyMuPDF','scikit-learn'];
+
+let timers=[];
+let currentTab='male';
+
+function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+function t(fn,ms){const id=setTimeout(fn,ms);timers.push(id);}
+
+function animateCount(el,target,suffix,duration){
+  let start=0;
+  const interval=setInterval(()=>{
+    start=Math.min(start+target/60,target);
+    el.textContent=Math.round(start*10)/10+suffix;
+    if(start>=target)clearInterval(interval);
+  },duration/60);
+}
+
+function switchTab(gender){
+  currentTab=gender;
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.classList.remove('active');
+  });
+  document.getElementById('tab-'+gender).classList.add('active');
+  replayAll();
+}
+
+function replayAll(){
+  clearTimers();
+  const c=convos[currentTab];
+  document.getElementById('chat-body').innerHTML='';
+  document.getElementById('deal-badge').classList.remove('show');
+  document.getElementById('offer-val').textContent='₹849';
+  document.getElementById('offer-val').classList.remove('dropped');
+  document.getElementById('gender-label').textContent=c.label;
+  document.getElementById('deal-text').textContent=c.deal;
+  document.getElementById('chat-header').className='chat-header '+c.headerClass;
+  document.getElementById('chat-avatar').className='chat-avatar '+c.avatarClass;
+  document.querySelectorAll('.flow-step').forEach(el=>el.classList.remove('show'));
+  document.querySelectorAll('.book-pill').forEach(el=>el.style.opacity=0);
+  document.querySelectorAll('.stack-pill').forEach(el=>el.style.opacity=0);
+  document.getElementById('s1').textContent='0%';
+  document.getElementById('s2').textContent='0%';
+  document.getElementById('s3').textContent='0';
+
+  c.msgs.forEach(m=>{
+    t(()=>{
+      const div=document.createElement('div');
+      const isAgent=m.role==='agent';
+      div.className='msg '+(isAgent?'agent '+c.agentClass:'customer')+' show';
+      let html=m.text;
+      if(m.intent){
+        html+=`<br><span class="intent-badge" style="background:${m.ic};color:${m.it}">${m.intent.replace(/_/g,' ')}</span>`;
+      }
+      div.innerHTML=html;
+      document.getElementById('chat-body').appendChild(div);
+      div.scrollIntoView({behavior:'smooth',block:'nearest'});
+      if(m.price){
+        t(()=>{
+          const el=document.getElementById('offer-val');
+          el.textContent='₹'+m.price;
+          el.classList.remove('dropped');
+          void el.offsetWidth;
+          el.classList.add('dropped');
+        },300);
+      }
+    },m.delay);
+  });
+
+  t(()=>document.getElementById('deal-badge').classList.add('show'),8000);
+  t(()=>animateCount(document.getElementById('s1'),80.5,'%',1000),800);
+  t(()=>animateCount(document.getElementById('s2'),83.17,'%',1000),1200);
+  t(()=>animateCount(document.getElementById('s3'),2383,'',1200),1600);
+  ['f1','f2','f3','f4'].forEach((id,i)=>t(()=>document.getElementById(id).classList.add('show'),2200+i*180));
+  document.querySelectorAll('.book-pill').forEach((el,i)=>t(()=>el.style.opacity=1,3000+i*100));
+  document.querySelectorAll('.stack-pill').forEach((el,i)=>t(()=>el.style.opacity=1,3800+i*80));
+}
+
+books.forEach(b=>{
+  const el=document.createElement('div');
+  el.className='book-pill';
+  el.textContent=b;
+  el.style.opacity=0;
+  document.getElementById('books-row').appendChild(el);
+});
+
+stack.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='stack-pill';
+  el.textContent=s;
+  el.style.opacity=0;
+  document.getElementById('stack-row').appendChild(el);
+});
+
+replayAll();
+</script>
+</body>
+</html>
