@@ -1,0 +1,5 @@
+flask
+twilio
+gradio_client
+gunicorn
+requests

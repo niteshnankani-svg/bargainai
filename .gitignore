@@ -1,0 +1,22 @@
+# Secrets
+.env
+gsk_*
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+
+# Model checkpoints / embeddings (large, not versioned)
+webhook/models/
+webhook/index/
+
+# Shopify local token store
+shopify/store_tokens.json
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/
